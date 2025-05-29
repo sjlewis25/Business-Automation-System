@@ -83,5 +83,4 @@ MIT License. Use or adapt for your own projects.
 ## Contact
 Built by Steve Lewis  
 GitHub: https://github.com/sjlewis25  
-LinkedIn: https://www.linkedin.com/in/buildwithsteveo
 
