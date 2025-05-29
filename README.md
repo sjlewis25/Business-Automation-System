@@ -1,10 +1,10 @@
-# 🏗️ Three-Tier AWS Architecture (Terraform)
+# Three-Tier AWS Architecture (Terraform)
 
 This project deploys a fully automated three-tier architecture on AWS using Terraform. It's designed to simulate a real-world production environment, emphasizing security, scalability, and modular Infrastructure as Code (IaC) principles.
 
 ---
 
-## 🔍 Overview
+## Overview
 
 The architecture includes:
 
@@ -19,15 +19,15 @@ All infrastructure is provisioned with Terraform and can be reused or expanded f
 
 ---
 
-## 📐 Architecture Diagram
+## Architecture Diagram
 
-![Three-Tier AWS Architecture](./diagram/three-tier-architecture.png)
+![Three-Tier AWS Architecture](/three-tier-architecture.png)
 
 > *If the diagram is not visible, open or download from `/diagram/three-tier-architecture.png`.*
 
 ---
 
-## 🛠️ Tools Used
+## Tools Used
 
 - **Terraform** – Infrastructure as Code  
 - **AWS VPC** – Virtual network environment  
@@ -38,7 +38,7 @@ All infrastructure is provisioned with Terraform and can be reused or expanded f
 
 ---
 
-## 🚀 How to Deploy
+## How to Deploy
 
 1. **Clone the repo**
 
@@ -67,7 +67,7 @@ terraform apply
 
 ---
 
-## ✅ Lessons Learned
+## Lessons Learned
 
 - Built reusable modules for VPC, compute, and networking  
 - Practiced least-privilege security with IAM and security groups  
@@ -76,7 +76,7 @@ terraform apply
 
 ---
 
-## 📂 File Structure
+## File Structure
 
 ```
 ├── main.tf
@@ -93,13 +93,13 @@ terraform apply
 
 ---
 
-## 📎 License
+## License
 
 MIT License. Feel free to use or adapt this architecture for your own projects.
 
 ---
 
-## 📫 Contact
+## Contact
 
 Built by [Steve Lewis](https://github.com/sjlewis25)  
 Feel free to connect or reach out with questions or suggestions.
