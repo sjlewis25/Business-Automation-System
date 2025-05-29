@@ -1,61 +1,107 @@
-# Three-Tier AWS Architecture
+# 🏗️ Three-Tier AWS Architecture (Terraform)
 
-## Overview
-This project demonstrates a scalable, secure three-tier web application architecture on AWS. It uses Amazon EC2 instances for the web and application tiers, an Amazon RDS MySQL instance for the database tier, and an Application Load Balancer (ALB) to distribute traffic efficiently. The project is designed with best practices for security, high availability, and scalability.
+This project deploys a fully automated three-tier architecture on AWS using Terraform. It's designed to simulate a real-world production environment, emphasizing security, scalability, and modular Infrastructure as Code (IaC) principles.
 
-## Prerequisites
-- **AWS Account**: Ensure you have an AWS account with the necessary permissions.
-- **AWS CLI**: Installed and configured on your machine.
-- **Terraform**: Installed on your local machine.
+---
 
-## Setup Instructions
+## 🔍 Overview
 
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/sjlewis25/Three-Tier-AWS-Architecture.git
-    cd Three-Tier-AWS-Architecture
-    ```
+The architecture includes:
 
-2. **Configure your AWS CLI** (if not done already):
-    ```bash
-    aws configure
-    ```
+- **VPC** with public and private subnets  
+- **Internet Gateway** for public traffic  
+- **NAT Gateway** for secure outbound access from private subnets  
+- **Application Load Balancer (ALB)** to distribute traffic  
+- **EC2 Instances** in private subnets behind the ALB  
+- **RDS placeholder** for future database integration (optional)
 
-3. **Initialize Terraform**:
-    ```bash
-    terraform init
-    ```
+All infrastructure is provisioned with Terraform and can be reused or expanded for real applications.
 
-4. **Apply Terraform to create the resources**:
-    ```bash
-    terraform apply
-    ```
+---
 
-5. **Confirm the changes** by typing `yes` when prompted.
+## 📐 Architecture Diagram
 
-## Usage
-After the deployment is complete, access your web application through the following URL:
-- `http://<your-ALB-DNS-name>.amazonaws.com`
+![Three-Tier AWS Architecture](./diagram/three-tier-architecture.png)
 
-## Security Best Practices
-- **VPC**: Public subnet for the web tier, private subnets for the app and database tiers.
-- **Security Groups**: Restrict inbound and outbound traffic to only what's necessary.
-- **IAM Roles**: Ensure proper least-privilege permissions.
+> *If the diagram is not visible, open or download from `/diagram/three-tier-architecture.png`.*
 
-## Cost Optimization
-- Use **EC2 Spot Instances** for non-production environments to reduce cost.
-- Choose **RDS Reserved Instances** for steady workloads to save on cost.
+---
 
-## CI/CD Pipeline
-- A **CI/CD pipeline** is set up using **GitHub Actions** to automatically deploy infrastructure changes when pushing to the repository.
+## 🛠️ Tools Used
 
-## Monitoring and Alerts
-- **CloudWatch Alarms** are configured to monitor EC2 instance health and RDS performance.
-- Logs are stored in **CloudWatch Logs** for auditing and troubleshooting.
+- **Terraform** – Infrastructure as Code  
+- **AWS VPC** – Virtual network environment  
+- **EC2** – Application servers  
+- **Application Load Balancer (ALB)** – Traffic routing  
+- **IAM** – Access management  
+- **NAT Gateway & Internet Gateway**
 
-## Contributing
-To contribute:
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Submit a pull request with a detailed description of the changes.
+---
+
+## 🚀 How to Deploy
+
+1. **Clone the repo**
+
+```bash
+git clone https://github.com/sjlewis25/Three-Tier-AWS-Architecture.git
+cd Three-Tier-AWS-Architecture
+```
+
+2. **Initialize Terraform**
+
+```bash
+terraform init
+```
+
+3. **Preview changes**
+
+```bash
+terraform plan
+```
+
+4. **Apply infrastructure**
+
+```bash
+terraform apply
+```
+
+---
+
+## ✅ Lessons Learned
+
+- Built reusable modules for VPC, compute, and networking  
+- Practiced least-privilege security with IAM and security groups  
+- Automated infrastructure provisioning from scratch using Terraform  
+- Gained deeper understanding of multi-tier networking in AWS
+
+---
+
+## 📂 File Structure
+
+```
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── modules/
+│   ├── vpc/
+│   ├── ec2/
+│   ├── alb/
+│   └── nat/
+├── diagram/
+│   └── three-tier-architecture.png
+```
+
+---
+
+## 📎 License
+
+MIT License. Feel free to use or adapt this architecture for your own projects.
+
+---
+
+## 📫 Contact
+
+Built by [Steve Lewis](https://github.com/sjlewis25)  
+Feel free to connect or reach out with questions or suggestions.
+
 
