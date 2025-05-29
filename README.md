@@ -87,7 +87,6 @@ terraform apply
 │   ├── ec2/
 │   ├── alb/
 │   └── nat/
-├── diagram/
 │   └── three-tier-architecture.png
 ```
 
