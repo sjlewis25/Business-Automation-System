@@ -23,7 +23,7 @@ All infrastructure is provisioned with Terraform and can be reused or expanded f
 
 ![Three-Tier AWS Architecture](/three-tier-architecture.png)
 
-> *If the diagram is not visible, open or download from `/diagram/three-tier-architecture.png`.*
+> *If the diagram is not visible, open or download from `/three-tier-architecture.png`.*
 
 ---
 
