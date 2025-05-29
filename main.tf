@@ -2,29 +2,70 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Create VPC
+# VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-# Create Public Subnets
+# Internet Gateway
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main_vpc.id
+}
+
+# Public Subnets
 resource "aws_subnet" "public_subnet_1" {
   vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = "10.0.10.0/24"
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
-  availability_zone        = "us-east-1a"
 }
 
 resource "aws_subnet" "public_subnet_2" {
   vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = "10.0.20.0/24"
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
-  availability_zone        = "us-east-1b"
 }
 
-# Create Security Group for Web Servers
-resource "aws_security_group" "web_sg" {
+# Private Subnets (for RDS)
+resource "aws_subnet" "private_subnet_1" {
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_subnet" "private_subnet_2" {
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.4.0/24"
+  availability_zone = "us-east-1b"
+}
+
+# Route Table
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+# Route Table Associations
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.public_subnet_1.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "b" {
+  subnet_id      = aws_subnet.public_subnet_2.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+# Security Group
+resource "aws_security_group" "web_sg" {
+  name        = "web-sg"
+  description = "Allow HTTP and restricted SSH"
+  vpc_id      = aws_vpc.main_vpc.id
 
   ingress {
     from_port   = 80
@@ -37,7 +78,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["16.98.25.40/32"]
   }
 
   egress {
@@ -48,9 +89,9 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-# Create EC2 Instances (Web Servers)
+# EC2 Web Servers (Ubuntu AMI)
 resource "aws_instance" "web_server_1" {
-  ami                    = "ami-0261755bbcb8c4a84"
+  ami                    = "ami-053b0d53c279acc90" # Ubuntu 22.04 LTS
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public_subnet_1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -58,16 +99,16 @@ resource "aws_instance" "web_server_1" {
 
   user_data = <<-EOF
               #!/bin/bash
-              sudo apt update -y
-              sudo apt install -y apache2
-              sudo systemctl start apache2
-              sudo systemctl enable apache2
-              echo "Hello, Terraform from Web Server 1!" > /var/www/html/index.html
+              apt update -y
+              apt install -y apache2
+              systemctl start apache2
+              systemctl enable apache2
+              echo "Hello from Web Server 1!" > /var/www/html/index.html
               EOF
 }
 
 resource "aws_instance" "web_server_2" {
-  ami                    = "ami-0261755bbcb8c4a84"
+  ami                    = "ami-053b0d53c279acc90" # Ubuntu 22.04 LTS
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public_subnet_2.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -75,15 +116,15 @@ resource "aws_instance" "web_server_2" {
 
   user_data = <<-EOF
               #!/bin/bash
-              sudo apt update -y
-              sudo apt install -y apache2
-              sudo systemctl start apache2
-              sudo systemctl enable apache2
-              echo "Hello, Terraform from Web Server 2!" > /var/www/html/index.html
+              apt update -y
+              apt install -y apache2
+              systemctl start apache2
+              systemctl enable apache2
+              echo "Hello from Web Server 2!" > /var/www/html/index.html
               EOF
 }
 
-# Create Load Balancer
+# Load Balancer
 resource "aws_lb" "app_lb" {
   name               = "app-load-balancer"
   internal           = false
@@ -92,41 +133,67 @@ resource "aws_lb" "app_lb" {
   subnets            = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
 }
 
-# Create Target Group
 resource "aws_lb_target_group" "target_group" {
-  name     = "app-target-group"
+  name     = "app-target-group-v5"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main_vpc.id
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
 }
 
-# Attach EC2 Instances to Target Group
 resource "aws_lb_target_group_attachment" "attach_1" {
   target_group_arn = aws_lb_target_group.target_group.arn
   target_id        = aws_instance.web_server_1.id
+  port             = 80
 }
 
 resource "aws_lb_target_group_attachment" "attach_2" {
   target_group_arn = aws_lb_target_group.target_group.arn
   target_id        = aws_instance.web_server_2.id
+  port             = 80
 }
 
-# Create RDS Subnet Group
+resource "aws_lb_listener" "app_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target_group.arn
+  }
+}
+
+# RDS Subnet Group in Private Subnets
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "db-subnet-group"
-  subnet_ids = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
+  name       = "db-subnet-group-v2"
+  subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
 }
 
-# Create RDS Database
+# RDS Instance
 resource "aws_db_instance" "database" {
-  allocated_storage      = 20
-  engine                = "mysql"
-  engine_version        = "8.0.35"
-  instance_class        = "db.t3.micro"
-  username             = "admin"
-  password             = "password123"
-  publicly_accessible  = false
-  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-  skip_final_snapshot  = true
+  identifier              = "my-db-instance"
+  allocated_storage       = 20
+  engine                  = "mysql"
+  engine_version          = "8.0"
+  instance_class          = "db.t3.micro"
+  username                = var.db_username
+  password                = var.db_password
+  skip_final_snapshot     = true
+  publicly_accessible     = false
+  db_subnet_group_name    = aws_db_subnet_group.db_subnet_group.name
+  vpc_security_group_ids  = [aws_security_group.web_sg.id]
 }
+
+# Variables for RDS creds
+variable "db_username" {}
+variable "db_password" {}

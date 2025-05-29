@@ -1,0 +1,10 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.crash
+.terraform.lock.hcl
+
+# Ignore variable files
+*.tfvars
+*.tfvars.json
