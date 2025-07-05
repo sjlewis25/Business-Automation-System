@@ -1,86 +1,113 @@
-# Three-Tier AWS Architecture (Terraform)
+# Business Automation System on AWS
 
-This project deploys a production-style three-tier architecture on AWS using Terraform. It simulates a real-world infrastructure setup used to host scalable and secure web applications, internal tools, or customer-facing services. The setup emphasizes modularity, automation, and AWS best practices.
+A fully deployable, three-tier architecture built with AWS and Terraform to automate common small business operations such as task tracking, order processing, and backend workflow management.
 
-## Architecture Overview
-- VPC with public and private subnets across multiple AZs
-- Internet Gateway for public access to load balancer
-- NAT Gateway for secure outbound traffic from private subnets
-- Application Load Balancer (ALB) routing HTTP/S traffic to EC2 instances
-- EC2 instances hosted in private subnets behind the ALB
-- IAM roles and security groups enforcing least-privilege access
-- Optional: Extendable to include RDS or DynamoDB for persistence
+---
 
-## Architecture Diagram
-![Three-Tier Architecture](three-tier-architecture.png)
+## Why This Project Matters
 
-This diagram visualizes the separation of web, application, and database layers in a secure networking layout.
+Many small businesses still rely on spreadsheets, email chains, or manual tracking boards to manage tasks and customer orders. This results in wasted time, human error, and poor visibility into business workflows.
 
-If the image doesn't render, [click here to view it directly](three-tier-architecture.png).
+This project provides an infrastructure blueprint that businesses or developers can use to deploy a scalable, secure, and automated system that replaces those manual processes with a structured cloud-based solution.
 
-## Tools Used
-- Terraform (v1.5+) – Infrastructure as Code
-- AWS VPC – Networking and subnet isolation
-- EC2 – Application servers
-- Application Load Balancer – Distributes traffic across EC2 targets
-- IAM – Secure access control and identity management
-- NAT Gateway / Internet Gateway – Internet access for the appropriate layers
+---
 
-## Use Case
-This infrastructure can host a web application (Node.js, Python, etc.), serve internal APIs behind a load balancer, or act as a foundation for multi-tier enterprise systems.
+## What This Project Does
+
+This system creates a production-ready environment using a traditional 3-tier architecture:
+
+- **Frontend Tier**: A public EC2 instance serves as the entry point for users to submit tasks or orders via a web interface.
+- **Application Tier**: A private EC2 instance runs a Flask-based backend to process and route incoming requests.
+- **Database Tier**: Amazon RDS (MySQL) stores submitted data with durability and query access.
+
+All components are provisioned using Terraform for repeatable and automated deployments.
+
+---
+
+## Use Cases
+
+You can adapt this system to:
+
+- Automate intake of service requests, work orders, or customer submissions
+- Track internal tasks or job statuses across teams
+- Serve as the backend for a lightweight business app or web form
+- Teach DevOps fundamentals using real infrastructure examples
+
+---
 
 ## How to Deploy
 
-Ensure you have Terraform installed and your AWS credentials configured.
+### Prerequisites
 
-Region used: us-east-1 (you can change this in the provider block)
+- AWS account with admin-level credentials
+- Terraform installed locally
+- SSH key pair available
 
-git clone https://github.com/sjlewis25/Three-Tier-AWS-Architecture.git  
-cd Three-Tier-AWS-Architecture  
-terraform init  
-terraform plan  
-terraform apply  
+### Steps
 
-To destroy the infrastructure:
+1. Clone the repo:
 
-terraform destroy
+   ```bash
+   git clone https://github.com/sjlewis25/Business-Automation-System.git
+   cd Business-Automation-System
+   ```
 
-## Outputs
-After deployment, Terraform will display:
-- ALB DNS name for web access
-- Subnet IDs
-- EC2 instance private IPs
+2. Configure your variables in `terraform.tfvars` or directly in `main.tf`.
 
-## Module Breakdown
-- vpc/ – Creates VPC, public/private subnets, route tables, gateways
-- alb/ – Provisions Application Load Balancer, listeners, and target groups
-- ec2/ – Launches EC2 instances in private subnets and associates them with the ALB
-- nat/ – Creates a NAT Gateway and routes for outbound internet access
+3. Initialize and apply Terraform:
 
-## Lessons Learned
-- Created fully modular and reusable Terraform components
-- Practiced IAM role and policy management for secure deployments
-- Gained experience automating high-availability, multi-tier environments
-- Confidently provisioned and destroyed AWS environments without using the console
+   ```bash
+   terraform init
+   terraform apply
+   ```
 
-## File Structure
-├── main.tf  
-├── variables.tf  
-├── outputs.tf  
-├── modules/  
-│   ├── vpc/  
-│   ├── ec2/  
-│   ├── alb/  
-│   └── nat/  
-├── three-tier-architecture.png
+4. After deployment, SSH into the frontend EC2 instance to access the app.
 
-## Cost Reminder
-This infrastructure includes billable AWS resources (ALB, EC2, NAT Gateway). Tear down when done to avoid unnecessary charges.
+---
+
+## Architecture Overview
+
+AWS Services Used:
+
+- **Networking**: VPC, Subnets, Route Tables, NAT Gateway, Internet Gateway
+- **Compute**: EC2 with Launch Templates and Auto Scaling
+- **Database**: RDS (MySQL)
+- **Security**: IAM Roles, Security Groups
+- **Monitoring**: CloudWatch Logs
+
+---
+
+## Project Structure
+
+```
+.
+├── app.py                  # Backend logic using Flask
+├── ec2_user_data.sh        # Bootstraps EC2 instances
+├── main.tf                 # Terraform infrastructure config
+├── outputs.tf              # Outputs for EC2 and RDS
+├── setup.sh                # Local setup script
+├── README.md               # Project documentation
+```
+
+---
+
+## Future Enhancements
+
+- Integrate with [Serverless Task API](https://github.com/sjlewis25/serverless-task-api)
+- Store uploaded documents in Amazon S3
+- Add CI/CD deployment via GitHub Actions
+
+---
 
 ## License
-MIT License. Use or adapt for your own projects.
 
-## Contact
-Built by Steve Lewis  
-GitHub: https://github.com/sjlewis25  
+This project is open-source and available for anyone to reuse, modify, or extend under the MIT license.
+
+---
+
+## Author
+
+Steven Lewis  
+GitHub: [https://github.com/sjlewis25](https://github.com/sjlewis25)
+
 
