@@ -1,0 +1,93 @@
+#!/bin/bash
+
+apt update -y
+apt install -y python3-pip mysql-client -y
+pip3 install flask gunicorn pymysql
+
+APP_DIR="/home/ubuntu/app"
+mkdir -p $APP_DIR
+
+# Create Flask app with hardcoded values injected by Terraform
+db_host="${db_host}"
+db_user="${db_user}"
+db_pass="${db_password}"
+db_name="${db_name}"
+
+cat <<EOL > $APP_DIR/app.py
+from flask import Flask, request, jsonify
+import pymysql
+
+app = Flask(__name__)
+
+DB_HOST = "$db_host"
+DB_USER = "$db_user"
+DB_PASS = "$db_pass"
+DB_NAME = "$db_name"
+
+def get_connection():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASS,
+        database=DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+@app.route("/")
+def index():
+    return "Business Automation App with RDS is Running!"
+
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM tasks")
+            result = cursor.fetchall()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    finally:
+        conn.close()
+
+@app.route("/tasks", methods=["POST"])
+def create_task():
+    data = request.get_json()
+    title = data.get("title")
+    status = data.get("status", "todo")
+    if not title:
+        return jsonify({"error": "Title is required"}), 400
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("INSERT INTO tasks (title, status) VALUES (%s, %s)", (title, status))
+            conn.commit()
+        return jsonify({"message": "Task created"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    finally:
+        conn.close()
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=80)
+EOL
+
+# Wait for RDS to be available
+RETRIES=10
+until mysql -h "$db_host" -u"$db_user" -p"$db_pass" -e "CREATE DATABASE IF NOT EXISTS $db_name;" || [ $RETRIES -eq 0 ]; do
+  echo "Waiting for RDS to be available..."
+  sleep 15
+  ((RETRIES--))
+done
+
+# Create table if not exists
+mysql -h "$db_host" -u"$db_user" -p"$db_pass" "$db_name" -e "
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'todo',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);"
+
+cd $APP_DIR
+gunicorn -w 2 -b 0.0.0.0:80 app:app &
