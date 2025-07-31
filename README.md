@@ -1,86 +1,76 @@
-# Business Automation System (3-tier architecture)
+# Business Automation System (AWS Infrastructure Project)
 
-This project deploys a production-style three-tier architecture on AWS using Terraform. It simulates a real-world infrastructure setup used to host scalable and secure web applications, internal tools, or customer-facing services. The setup emphasizes modularity, automation, and AWS best practices.
+This project sets up secure, production-ready cloud infrastructure for a small business app using Terraform and AWS. It provisions the full backend environment needed to run a Python/Flask application backed by a MySQL database.
 
-## Architecture Overview
-- VPC with public and private subnets across multiple AZs
-- Internet Gateway for public access to load balancer
-- NAT Gateway for secure outbound traffic from private subnets
-- Application Load Balancer (ALB) routing HTTP/S traffic to EC2 instances
-- EC2 instances hosted in private subnets behind the ALB
-- IAM roles and security groups enforcing least-privilege access
-- Optional: Extendable to include RDS or DynamoDB for persistence
+## What Problem Does It Solve?
 
-## Architecture Diagram
-![Three-Tier Architecture](three-tier-architecture.png)
+Most small businesses don't have reliable infrastructure to host their internal tools or services. This project solves that by providing:
 
-This diagram visualizes the separation of web, application, and database layers in a secure networking layout.
+- A secure VPC with public/private subnet isolation  
+- An EC2 instance to host the web app  
+- A private RDS MySQL database  
+- Security groups to control access  
+- Remote backend support for collaboration and version control  
 
-If the image doesn't render, [click here to view it directly](three-tier-architecture.png).
+The infrastructure is fully automated, modular, and ready to use in real-world scenarios.
 
-## Tools Used
-- Terraform (v1.5+) – Infrastructure as Code
-- AWS VPC – Networking and subnet isolation
-- EC2 – Application servers
-- Application Load Balancer – Distributes traffic across EC2 targets
-- IAM – Secure access control and identity management
-- NAT Gateway / Internet Gateway – Internet access for the appropriate layers
+## Tech Stack
 
-## Use Case
-This infrastructure can host a web application (Node.js, Python, etc.), serve internal APIs behind a load balancer, or act as a foundation for multi-tier enterprise systems.
-
-## How to Deploy
-
-Ensure you have Terraform installed and your AWS credentials configured.
-
-Region used: us-east-1 (you can change this in the provider block)
-
-git clone https://github.com/sjlewis25/Three-Tier-AWS-Architecture.git  
-cd Three-Tier-AWS-Architecture  
-terraform init  
-terraform plan  
-terraform apply  
-
-To destroy the infrastructure:
-
-terraform destroy
-
-## Outputs
-After deployment, Terraform will display:
-- ALB DNS name for web access
-- Subnet IDs
-- EC2 instance private IPs
-
-## Module Breakdown
-- vpc/ – Creates VPC, public/private subnets, route tables, gateways
-- alb/ – Provisions Application Load Balancer, listeners, and target groups
-- ec2/ – Launches EC2 instances in private subnets and associates them with the ALB
-- nat/ – Creates a NAT Gateway and routes for outbound internet access
-
-## Lessons Learned
-- Created fully modular and reusable Terraform components
-- Practiced IAM role and policy management for secure deployments
-- Gained experience automating high-availability, multi-tier environments
-- Confidently provisioned and destroyed AWS environments without using the console
+- **Terraform** for Infrastructure as Code  
+- **AWS VPC** with public and private subnets  
+- **AWS EC2** instance running a Python/Flask web application  
+- **AWS RDS** (MySQL) for persistent database storage in private subnets  
+- **AWS Application Load Balancer** for routing traffic to EC2  
+- **AWS S3** for remote state storage  
+- **AWS DynamoDB** for Terraform state locking  
+- **Security Groups** for SSH, HTTP, and MySQL access control  
 
 ## File Structure
-├── main.tf  
-├── variables.tf  
-├── outputs.tf  
-├── modules/  
-│   ├── vpc/  
-│   ├── ec2/  
-│   ├── alb/  
-│   └── nat/  
-├── three-tier-architecture.png
 
-## Cost Reminder
-This infrastructure includes billable AWS resources (ALB, EC2, NAT Gateway). Tear down when done to avoid unnecessary charges.
+```
+modules/
+├── ec2/
+├── rds/
+├── security_groups/
+├── vpc/
+scripts/
+└── user_data.sh
+```
 
-## License
-MIT License. Use or adapt for your own projects.
+## Security Highlights
 
-## Contact
-Built by Steve Lewis  
-GitHub: https://github.com/sjlewis25  
+- SSH access restricted to a single trusted IP  
+- RDS is isolated in private subnets with no public access  
+- Security groups use least-privilege rules  
+- Remote state stored in S3 with locking via DynamoDB to prevent corruption  
 
+## Future Upgrades
+
+- Add monitoring and logging with CloudWatch  
+- Implement CI/CD pipeline for automated deployment  
+- Store credentials in AWS Secrets Manager  
+- Add autoscaling for EC2 instances  
+- Enable VPC flow logs for auditing and diagnostics  
+
+## Getting Started
+
+**Requirements:**
+- AWS CLI configured  
+- Terraform installed  
+- IAM access to provision AWS resources  
+
+**Deploy:**
+```bash
+terraform init
+terraform apply
+```
+
+**Teardown:**
+```bash
+terraform destroy
+```
+
+## Author
+
+Steven Lewis  
+GitHub: [@sjlewis25](https://github.com/sjlewis25)
