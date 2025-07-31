@@ -1,4 +1,4 @@
-# Three-Tier AWS Architecture (Terraform)
+# Business Automation System (3-tier architecture)
 
 This project deploys a production-style three-tier architecture on AWS using Terraform. It simulates a real-world infrastructure setup used to host scalable and secure web applications, internal tools, or customer-facing services. The setup emphasizes modularity, automation, and AWS best practices.
 
