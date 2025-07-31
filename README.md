@@ -1,4 +1,4 @@
-# Business Automation System (AWS Infrastructure Project)
+# Business Automation System (3-tier Architecture)
 
 This project sets up secure, production-ready cloud infrastructure for a small business app using Terraform and AWS. It provisions the full backend environment needed to run a Python/Flask application backed by a MySQL database.
 
