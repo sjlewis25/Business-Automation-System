@@ -1,10 +1,16 @@
-# Terraform
+# Terraform state and cache
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
 .terraform/
-.crash
-.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+*.backup
 
-# Ignore variable files
-*.tfvars
-*.tfvars.json
+# Sensitive or runtime files
+*.pem
+*.log
+*.zip
+
+# Editor settings
+.vscode/
+

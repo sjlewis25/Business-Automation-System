@@ -1,8 +1,7 @@
 output "rds_endpoint" {
-  value = aws_db_instance.database.endpoint
-  description = "RDS Endpoint"
+  value = module.rds.db_endpoint
 }
 
 output "web_server_public_ip" {
-  value = aws_instance.web_server.public_ip
+  value = module.ec2.public_ip
 }
