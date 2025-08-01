@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+      EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_USER: ec2-user
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.8.5
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan
+
+    # You could uncomment this if you want infra auto-deployed (risky in prod)
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve
+
+    - name: Set up SSH key
+      run: |
+        echo "$EC2_SSH_KEY" > key.pem
+        chmod 600 key.pem
+
+    - name: Copy Flask app to EC2
+      run: |
+        scp -o StrictHostKeyChecking=no -i key.pem scripts/user_data.sh $EC2_USER@$EC2_PUBLIC_IP:/home/ec2-user/deploy.sh
+
+    - name: Run remote deploy script
+      run: |
+        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_PUBLIC_IP 'bash /home/ec2-user/deploy.sh'
