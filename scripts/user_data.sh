@@ -67,3 +67,13 @@ EOF
   -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json \
   -s
 
+# Copy CloudWatch config to the correct location
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
+cp /home/ec2-user/cloudwatch-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+# Start CloudWatch Agent with the config
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+  -s
