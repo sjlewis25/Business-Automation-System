@@ -33,3 +33,37 @@ EOL
 cd /app
 gunicorn -w 2 -b 0.0.0.0:80 app:app &
 
+# Install CloudWatch Agent
+yum install -y amazon-cloudwatch-agent
+
+# Create CloudWatch Agent config
+cat <<EOF > /opt/aws/amazon-cloudwatch-agent/bin/config.json
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/messages",
+            "log_group_name": "business-automation-logs",
+            "log_stream_name": "{instance_id}-messages"
+          },
+          {
+            "file_path": "/app/gunicorn.log",
+            "log_group_name": "business-automation-logs",
+            "log_stream_name": "{instance_id}-gunicorn"
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+
+# Start the agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json \
+  -s
+
