@@ -1,12 +1,21 @@
 #!/bin/bash
+# Update and install dependencies
 sudo apt update -y
-sudo apt install python3-pip -y
+sudo apt install -y python3-pip awscli jq
 pip3 install flask gunicorn pymysql
 
 # Set environment variables
 echo "export DB_HOST='$(terraform output -raw rds_endpoint | cut -d: -f1)'" >> /home/ubuntu/.bashrc
 echo "export DB_USER='admin'" >> /home/ubuntu/.bashrc
-echo "export DB_PASSWORD='YourStrongPassword123!'" >> /home/ubuntu/.bashrc
+
+# Fetch password from Secrets Manager and set as env var
+SECRET=$(aws secretsmanager get-secret-value \
+  --region us-east-1 \
+  --secret-id prod/db-credentials \
+  --query SecretString \
+  --output text)
+
+echo "export DB_PASSWORD=$(echo $SECRET | jq -r .password)" >> /home/ubuntu/.bashrc
 
 # Create app directory
 mkdir -p /home/ubuntu/app
@@ -53,4 +62,5 @@ EOF
 # Run Flask app with gunicorn on port 80
 cd /home/ubuntu/app
 gunicorn --bind 0.0.0.0:80 app:app --daemon
+
 
