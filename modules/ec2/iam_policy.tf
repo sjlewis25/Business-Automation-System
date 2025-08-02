@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_policy" "secretsmanager_read" {
   name        = "SecretsManagerReadAccess"
   description = "Allow EC2 to read database credentials from Secrets Manager"
