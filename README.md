@@ -1,29 +1,35 @@
-# Business Automation System (3-tier Architecture)
+# Business Automation System (AWS 3-Tier Architecture)
 
-This project sets up secure, production-ready cloud infrastructure for a small business app using Terraform and AWS. It provisions the full backend environment needed to run a Python/Flask application backed by a MySQL database.
+## Project Description
 
-## What Problem Does It Solve?
+The Business Automation System is a cloud-based infrastructure project built to support a small-to-medium business backend. It provisions a secure, modular, and production-ready 3-tier architecture using AWS and Terraform. The system hosts a Python/Flask application with a MySQL database and includes CI/CD, Secrets Management, centralized logging, and monitoring.
 
-Most small businesses don't have reliable infrastructure to host their internal tools or services. This project solves that by providing:
+## What Does It Do?
 
-- A secure VPC with public/private subnet isolation  
-- An EC2 instance to host the web app  
-- A private RDS MySQL database  
-- Security groups to control access  
-- Remote backend support for collaboration and version control  
+- Provisions AWS infrastructure using Terraform (VPC, EC2, RDS, Security Groups)
+- Deploys a Flask application on an EC2 instance using a remote deploy script
+- Secures and retrieves credentials from AWS Secrets Manager
+- Uses GitHub Actions for CI/CD automation
+- Enables monitoring through AWS CloudWatch Agent
+- Stores Terraform remote state in S3 with DynamoDB state locking
 
-The infrastructure is fully automated, modular, and ready to use in real-world scenarios.
+## Why Is It Useful?
+
+Most small businesses lack the resources to implement secure, scalable infrastructure. This project demonstrates how to:
+- Deploy real-world cloud infrastructure using infrastructure-as-code
+- Secure workloads using IAM, private subnets, and least-privilege access
+- Automate deployments using CI/CD best practices
+- Monitor logs and system health using built-in AWS tools
+It serves as both a production-ready baseline and a learning tool for cloud engineers.
 
 ## Tech Stack
 
-- **Terraform** for Infrastructure as Code  
-- **AWS VPC** with public and private subnets  
-- **AWS EC2** instance running a Python/Flask web application  
-- **AWS RDS** (MySQL) for persistent database storage in private subnets  
-- **AWS Application Load Balancer** for routing traffic to EC2  
-- **AWS S3** for remote state storage  
-- **AWS DynamoDB** for Terraform state locking  
-- **Security Groups** for SSH, HTTP, and MySQL access control  
+- **Infrastructure**: Terraform (IaC), AWS (VPC, EC2, RDS, S3, IAM, CloudWatch)
+- **Application Layer**: Python, Flask, Gunicorn
+- **Database**: Amazon RDS (MySQL)
+- **Secrets Management**: AWS Secrets Manager
+- **Logging & Monitoring**: AWS CloudWatch
+- **CI/CD**: GitHub Actions
 
 ## File Structure
 
@@ -35,42 +41,63 @@ modules/
 ├── vpc/
 scripts/
 └── user_data.sh
+.github/workflows/
+└── ci-cd.yaml
+monitoring.tf
+main.tf
+variables.tf
+outputs.tf
+terraform.tfvars
 ```
 
-## Security Highlights
+## How to Install and Run the Project
 
-- SSH access restricted to a single trusted IP  
-- RDS is isolated in private subnets with no public access  
-- Security groups use least-privilege rules  
-- Remote state stored in S3 with locking via DynamoDB to prevent corruption  
+### Prerequisites
+- AWS CLI installed and configured
+- Terraform installed (v1.8+)
+- SSH key pair (private key stored as GitHub secret)
+- AWS IAM user/role with permissions to manage infrastructure
+- GitHub repository secrets configured:
+  - `EC2_PUBLIC_IP`
+  - `EC2_SSH_KEY`
 
-## Future Upgrades
+### Steps to Deploy
 
-- Add monitoring and logging with CloudWatch  
-- Implement CI/CD pipeline for automated deployment  
-- Store credentials in AWS Secrets Manager  
-- Add autoscaling for EC2 instances  
-- Enable VPC flow logs for auditing and diagnostics  
+1. **Initialize Terraform and Apply**
+   ```
+   terraform init
+   terraform plan
+   terraform apply
+   ```
 
-## Getting Started
+2. **Push App Changes to Trigger CI/CD**
+   ```
+   git add .
+   git commit -m "Deploy update"
+   git push origin main
+   ```
 
-**Requirements:**
-- AWS CLI configured  
-- Terraform installed  
-- IAM access to provision AWS resources  
+3. **Verify Application**
+   - Access your Flask app in the browser using the EC2 public IP
+   - Confirm database access and log ingestion to CloudWatch
 
-**Deploy:**
-```bash
-terraform init
-terraform apply
-```
+4. **Destroy Infrastructure**
+   ```
+   terraform destroy
+   ```
 
-**Teardown:**
-```bash
-terraform destroy
-```
+## Lessons Learned
+
+- How to build reusable and modular Terraform infrastructure
+- The importance of remote state management and locking for team collaboration
+- How to restrict access using IAM roles, instance profiles, and security groups
+- Integration of GitHub Actions for automated deployment pipelines
+- Secure secret handling using AWS Secrets Manager
+- Using CloudWatch Agent for centralized log collection and system metrics
+
+---
 
 ## Author
 
-Steven Lewis  
+**Steven Lewis**  
 GitHub: [@sjlewis25](https://github.com/sjlewis25)
