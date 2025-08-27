@@ -1,79 +1,50 @@
 #!/bin/bash
-apt update -y
-apt install -y python3-pip mysql-client awscli jq
-pip3 install flask pymysql gunicorn
 
-# Fetch secret from Secrets Manager
-SECRET=$(aws secretsmanager get-secret-value --secret-id prod/db-credentials --region us-east-1)
-DB_USER=$(echo $SECRET | jq -r '.SecretString' | jq -r '.username')
-DB_PASS=$(echo $SECRET | jq -r '.SecretString' | jq -r '.password')
+# Update and install packages
+yum update -y
+yum install -y python3 git
 
-# Store credentials securely in a config file (not hardcoded)
-mkdir -p /app
-echo "DB_USER=$DB_USER" >> /app/app.env
-echo "DB_PASS=$DB_PASS" >> /app/app.env
-chmod 600 /app/app.env
+# Install pip packages
+pip3 install flask gunicorn pymysql boto3
 
-# Create simple Flask app
-cat <<EOL > /app/app.py
+# Create app directory
+mkdir -p /srv/app
+cat <<EOF > /srv/app/app.py
 from flask import Flask
-import pymysql
 import os
 
 app = Flask(__name__)
 
 @app.route("/")
-def home():
-    return "Business Automation App with RDS is Running!"
+def index():
+    return "App is running!"
+
+@app.route("/health")
+def health():
+    return "OK", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
-EOL
-
-cd /app
-gunicorn -w 2 -b 0.0.0.0:80 app:app &
-
-# Install CloudWatch Agent
-yum install -y amazon-cloudwatch-agent
-
-# Create CloudWatch Agent config
-cat <<EOF > /opt/aws/amazon-cloudwatch-agent/bin/config.json
-{
-  "logs": {
-    "logs_collected": {
-      "files": {
-        "collect_list": [
-          {
-            "file_path": "/var/log/messages",
-            "log_group_name": "business-automation-logs",
-            "log_stream_name": "{instance_id}-messages"
-          },
-          {
-            "file_path": "/app/gunicorn.log",
-            "log_group_name": "business-automation-logs",
-            "log_stream_name": "{instance_id}-gunicorn"
-          }
-        ]
-      }
-    }
-  }
-}
+    app.run()
 EOF
 
-# Start the agent
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-  -a fetch-config \
-  -m ec2 \
-  -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json \
-  -s
+# Create systemd unit for gunicorn
+cat <<EOF > /etc/systemd/system/flask.service
+[Unit]
+Description=Flask Gunicorn App
+After=network.target
 
-# Copy CloudWatch config to the correct location
-mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
-cp /home/ec2-user/cloudwatch-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+[Service]
+User=ec2-user
+WorkingDirectory=/srv/app
+ExecStart=/usr/local/bin/gunicorn -w 2 -b 0.0.0.0:8000 app:app
+Restart=always
 
-# Start CloudWatch Agent with the config
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
-  -a fetch-config \
-  -m ec2 \
-  -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
-  -s
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Start and enable the service
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl enable flask
+systemctl start flask

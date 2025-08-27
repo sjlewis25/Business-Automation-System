@@ -13,3 +13,13 @@ variable "my_ip" {}
 variable "db_name" {}
 variable "db_username" {}
 variable "db_password" {}
+
+variable "environment" {
+  description = "The environment name (dev, test, prod)"
+  type        = string
+}
+
+variable "public_subnet_2_cidr" {
+  description = "CIDR block for the second public subnet"
+  type        = string
+}

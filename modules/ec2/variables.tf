@@ -18,3 +18,8 @@ variable "user_data_template" {
   type = string
   description = "Path to the user_data script file"
 }
+
+variable "iam_instance_profile" {
+  description = "IAM instance profile name to attach to EC2"
+  type        = string
+}
