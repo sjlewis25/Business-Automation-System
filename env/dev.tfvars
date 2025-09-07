@@ -12,7 +12,21 @@ ami_id                 = "ami-0c02fb55956c7d316"  # Amazon Linux 2
 instance_type          = "t2.micro"
 
 db_name                = "mydb"
-db_username            = "admin"
-db_password            = "Password1234"
 
 my_ip                  = "0.0.0.0/0"
+
+module "asg_app" {
+  source = "../../modules/asg_app"
+
+  name              = "business-app"
+  ami_id            = var.ami_id
+  instance_type     = var.instance_type
+
+  security_group_id = module.ec2_sg.security_group_id
+  subnet_ids        = module.vpc.public_subnets
+  target_group_arn  = module.alb.target_group_arn
+
+  db_host     = module.rds.db_instance_endpoint
+  db_user     = var.db_username
+  db_password = var.db_password
+}
