@@ -18,17 +18,18 @@ module "security_groups" {
   my_ip  = var.my_ip
 }
 
-module "asg" {
-  source               = "./modules/asg"
-  ami_id               = var.ami_id
-  instance_type        = var.instance_type
-  user_data_path       = "${path.module}/scripts/user_data.sh"
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
-  security_group_ids   = [module.security_groups.web_sg_id]
-  public_subnet_ids    = module.vpc.public_subnet_ids
-  private_subnet_ids   = module.vpc.private_subnet_ids
-  target_group_arn     = module.alb.target_group_arn
-  environment          = var.environment
+module "asg_app" {
+  source              = "./modules/asg_app"
+  name                = "business-app"
+  ami_id              = var.ami_id
+  instance_type       = var.instance_type
+  security_group_id   = module.security_groups.web_sg_id
+  subnet_ids          = module.vpc.public_subnet_ids
+  target_group_arn    = module.alb.target_group_arn
+
+  db_host             = module.rds.db_instance_endpoint
+  db_user             = var.db_username
+  db_password         = var.db_password
 }
 
 module "alb" {
@@ -47,5 +48,7 @@ module "rds" {
   subnet_ids  = module.vpc.private_subnet_ids
   vpc_id      = module.vpc.vpc_id
   sg_id       = module.security_groups.rds_sg_id
+  environment = var.environment
 }
+
 

@@ -23,3 +23,8 @@ variable "vpc_id" {
 variable "sg_id" {
   type = string
 }
+
+variable "environment" {
+  description = "Environment name (e.g., dev, test, prod)"
+  type        = string
+}

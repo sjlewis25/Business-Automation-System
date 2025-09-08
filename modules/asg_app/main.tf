@@ -24,12 +24,11 @@ resource "aws_autoscaling_group" "app" {
   health_check_type         = "ELB"
   health_check_grace_period = 60
   vpc_zone_identifier       = var.subnet_ids
-
-  target_group_arns = [var.target_group_arn]
+  target_group_arns         = [var.target_group_arn]
 
   launch_template {
     id      = aws_launch_template.app.id
-    version = "$Latest"
+    version = aws_launch_template.app.latest_version
   }
 
   tag {
