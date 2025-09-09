@@ -1,50 +1,31 @@
 #!/bin/bash
 
-# Update and install packages
+set -e
+
+# Install system dependencies
 yum update -y
-yum install -y python3 git
+yum install -y python3 git mysql jq aws-cli
 
-# Install pip packages
-pip3 install flask gunicorn pymysql boto3
+# Upgrade pip
+python3 -m pip install --upgrade pip
 
-# Create app directory
-mkdir -p /srv/app
-cat <<EOF > /srv/app/app.py
-from flask import Flask
-import os
+# Clone your GitHub repo
+cd /home/ec2-user
+git clone https://github.com/sjlewis25/Business-Automation-System.git
 
-app = Flask(__name__)
+cd Business-Automation-System/Application
 
-@app.route("/")
-def index():
-    return "App is running!"
+# Install Python dependencies
+pip3 install -r requirements.txt
 
-@app.route("/health")
-def health():
-    return "OK", 200
+# Fetch secrets from AWS Secrets Manager
+SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id flask-db-secret --query SecretString --output text)
 
-if __name__ == "__main__":
-    app.run()
-EOF
+# Export environment variables
+export DB_HOST=$(echo $SECRET_JSON | jq -r .host)
+export DB_USER=$(echo $SECRET_JSON | jq -r .username)
+export DB_PASS=$(echo $SECRET_JSON | jq -r .password)
+export DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)
 
-# Create systemd unit for gunicorn
-cat <<EOF > /etc/systemd/system/flask.service
-[Unit]
-Description=Flask Gunicorn App
-After=network.target
-
-[Service]
-User=ec2-user
-WorkingDirectory=/srv/app
-ExecStart=/usr/local/bin/gunicorn -w 2 -b 0.0.0.0:8000 app:app
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Start and enable the service
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl enable flask
-systemctl start flask
+# Start Flask app
+nohup python3 app.py > /var/log/flask_app.log 2>&1 &
