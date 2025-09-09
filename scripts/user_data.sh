@@ -29,3 +29,16 @@ export DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)
 
 # Start Flask app
 nohup python3 app.py > /var/log/flask_app.log 2>&1 &
+
+# Install CloudWatch Agent
+yum install -y amazon-cloudwatch-agent
+
+# Copy existing CloudWatch log config file into place
+cp /home/ec2-user/Business-Automation-System/scripts/cloudwatch-logs-config.json /opt/aws/amazon-cloudwatch-agent/etc/log-config.json
+
+# Start CloudWatch Agent with the config
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+  -a fetch-config \
+  -m ec2 \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/log-config.json \
+  -s
