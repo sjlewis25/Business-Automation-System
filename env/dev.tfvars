@@ -17,4 +17,7 @@ db_name                = "mydb"
 db_username            = "admin"
 db_password            = "somepassword"
 
+budget_notification_email = "steven.j.lewis.2024@gmail.com"
+
+
 

@@ -30,3 +30,18 @@ variable "name" {
   default     = "business-app"
 }
 
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type = map(string)
+  default = {
+    Environment = "dev"
+    Project     = "BusinessAutomationSystem"
+  }
+}
+
+variable "budget_notification_email" {
+  description = "Email address for cost alerts"
+  type        = string
+}
+
+

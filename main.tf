@@ -10,12 +10,14 @@ module "vpc" {
   private_subnet_1_cidr  = var.private_subnet_1_cidr
   private_subnet_2_cidr  = var.private_subnet_2_cidr
   availability_zones     = var.availability_zones
+  common_tags = var.common_tags
 }
 
 module "security_groups" {
   source = "./modules/security_groups"
   vpc_id = module.vpc.vpc_id
   my_ip  = var.my_ip
+  common_tags = var.common_tags
 }
 
 module "asg_app" {
@@ -30,6 +32,7 @@ module "asg_app" {
   db_host             = module.rds.db_instance_endpoint
   db_user             = var.db_username
   db_password         = var.db_password
+  common_tags = var.common_tags
 }
 
 module "alb" {
@@ -38,6 +41,7 @@ module "alb" {
   public_subnet_ids = module.vpc.public_subnet_ids
   alb_sg_id         = module.security_groups.alb_sg_id
   environment       = var.environment
+  common_tags = var.common_tags
 }
 
 module "rds" {
@@ -49,6 +53,39 @@ module "rds" {
   vpc_id      = module.vpc.vpc_id
   sg_id       = module.security_groups.rds_sg_id
   environment = var.environment
+  common_tags = var.common_tags
+}
+
+module "cloudwatch_alarms" {
+  source           = "./modules/cloudwatch"
+  alb_name         = module.alb.alb_name
+  rds_instance_id  = module.rds.db_instance_id
+  environment      = var.environment
+  common_tags = var.common_tags
+}
+
+resource "aws_budgets_budget" "ec2_monthly_budget" {
+  name              = "ec2-monthly-budget"
+  budget_type       = "COST"
+  limit_amount      = "20"
+  limit_unit        = "USD"
+  time_unit         = "MONTHLY"
+
+  cost_filters = {
+    Service = "AmazonEC2"
+  }
+
+  notification {
+    comparison_operator = "GREATER_THAN"
+    threshold           = 80
+    threshold_type      = "PERCENTAGE"
+    notification_type   = "ACTUAL"
+
+    subscriber {
+      address            = var.budget_notification_email
+      subscription_type = "EMAIL"
+    }
+  }
 }
 
 
