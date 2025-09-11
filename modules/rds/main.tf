@@ -2,10 +2,13 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "db-subnet-group"
   subnet_ids = var.subnet_ids
 
-  tags = {
-    Name        = "db-subnet-group"
-    Environment = var.environment
-  }
+  tags = merge(
+    {
+      Name        = "db-subnet-group"
+      Environment = var.environment
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_db_instance" "database" {
@@ -28,10 +31,14 @@ resource "aws_db_instance" "database" {
   publicly_accessible     = false
   skip_final_snapshot     = true
 
-  tags = {
-    Name        = "smartops-db"
-    Environment = var.environment
-  }
+  tags = merge(
+    {
+      Name        = "smartops-db"
+      Environment = var.environment
+    },
+    var.common_tags
+  )
 }
+
 
 

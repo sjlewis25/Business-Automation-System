@@ -23,6 +23,13 @@ resource "aws_security_group" "web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(
+    {
+      Name = "web-sg"
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_security_group" "rds_sg" {
@@ -43,6 +50,13 @@ resource "aws_security_group" "rds_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(
+    {
+      Name = "rds-sg"
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_security_group" "alb_sg" {
@@ -63,5 +77,13 @@ resource "aws_security_group" "alb_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(
+    {
+      Name = "alb-sg"
+    },
+    var.common_tags
+  )
 }
+
 

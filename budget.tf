@@ -1,26 +1,30 @@
-resource "aws_budgets_budget" "monthly_cost_budget" {
-  name              = "monthly-cost-budget"
+resource "aws_budgets_budget" "monthly_budget" {
+  name              = "ec2-monthly-budget"
   budget_type       = "COST"
-  limit_amount      = "20"
+  limit_amount      = "100"
   limit_unit        = "USD"
   time_unit         = "MONTHLY"
 
   cost_filter {
-    name = "Service"
+    name   = "Service"
     values = ["Amazon Elastic Compute Cloud - Compute"]
   }
 
-  time_period_start = formatdate("YYYY-MM-DD", timestamp())
+  notification {
+    comparison_operator = "GREATER_THAN"
+    notification_type   = "ACTUAL"
+    threshold           = 80
+    threshold_type      = "PERCENTAGE"
+  }
 
   notification {
     comparison_operator = "GREATER_THAN"
+    notification_type   = "ACTUAL"
     threshold           = 80
     threshold_type      = "PERCENTAGE"
-    notification_type   = "ACTUAL"
 
-    subscriber {
-      address          = var.budget_notification_email
-      subscription_type = "EMAIL"
-    }
+    subscriber_email_addresses = [var.budget_email]
   }
 }
+
+

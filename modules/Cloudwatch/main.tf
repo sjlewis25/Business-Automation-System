@@ -11,6 +11,13 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   dimensions = {
     LoadBalancer = var.alb_name
   }
+
+  tags = merge(
+    {
+      Name = "${var.environment}-alb-5xx-errors"
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
@@ -26,4 +33,12 @@ resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
   dimensions = {
     DBInstanceIdentifier = var.rds_instance_id
   }
+
+  tags = merge(
+    {
+      Name = "${var.environment}-rds-high-cpu"
+    },
+    var.common_tags
+  )
 }
+

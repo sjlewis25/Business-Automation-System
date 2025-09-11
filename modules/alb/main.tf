@@ -4,6 +4,13 @@ resource "aws_lb" "app_alb" {
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnet_ids
+
+  tags = merge(
+    {
+      Name = "${var.environment}-alb"
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_lb_target_group" "app_tg" {
@@ -20,6 +27,13 @@ resource "aws_lb_target_group" "app_tg" {
     unhealthy_threshold = 2
     matcher             = "200"
   }
+
+  tags = merge(
+    {
+      Name = "${var.environment}-tg"
+    },
+    var.common_tags
+  )
 }
 
 resource "aws_lb_listener" "http" {
@@ -31,4 +45,12 @@ resource "aws_lb_listener" "http" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.app_tg.arn
   }
+
+  tags = merge(
+    {
+      Name = "${var.environment}-listener"
+    },
+    var.common_tags
+  )
 }
+

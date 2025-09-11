@@ -11,6 +11,17 @@ resource "aws_launch_template" "app" {
 
   vpc_security_group_ids = [var.security_group_id]
 
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = merge(
+      {
+        Name = var.name
+      },
+      var.common_tags
+    )
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -37,7 +48,17 @@ resource "aws_autoscaling_group" "app" {
     propagate_at_launch = true
   }
 
+  dynamic "tag" {
+    for_each = var.common_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
   lifecycle {
     create_before_destroy = true
   }
 }
+

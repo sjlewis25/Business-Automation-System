@@ -4,12 +4,10 @@ variable "db_name" {
 
 variable "db_username" {
   type = string
-  sensitive = true
 }
 
 variable "db_password" {
   type = string
-  sensitive = true
 }
 
 variable "subnet_ids" {
@@ -25,6 +23,10 @@ variable "sg_id" {
 }
 
 variable "environment" {
-  description = "Environment name (e.g., dev, test, prod)"
-  type        = string
+  type = string
+}
+
+variable "common_tags" {
+  description = "Common tags for RDS resources"
+  type        = map(string)
 }

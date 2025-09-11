@@ -22,3 +22,8 @@ variable "private_subnet_2_cidr" {
 variable "availability_zones" {
   type = list(string)
 }
+
+variable "common_tags" {
+  description = "Common tags to apply to resources"
+  type        = map(string)
+}

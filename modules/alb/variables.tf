@@ -13,3 +13,8 @@ variable "alb_sg_id" {
 variable "environment" {
   type = string
 }
+
+variable "common_tags" {
+  description = "Tags to apply to ALB resources"
+  type        = map(string)
+}

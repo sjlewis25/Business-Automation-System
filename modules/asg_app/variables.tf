@@ -33,4 +33,9 @@ variable "db_user" {}
 
 variable "db_password" {}
 
+variable "common_tags" {
+  description = "Common tags to apply to all ASG resources"
+  type        = map(string)
+}
+
 
