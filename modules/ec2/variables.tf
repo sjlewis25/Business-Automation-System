@@ -15,7 +15,7 @@ variable "security_group_ids" {
 }
 
 variable "user_data_template" {
-  type = string
+  type        = string
   description = "Path to the user_data script file"
 }
 

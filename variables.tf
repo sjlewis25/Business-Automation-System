@@ -32,7 +32,7 @@ variable "name" {
 
 variable "common_tags" {
   description = "Common tags to apply to all resources"
-  type = map(string)
+  type        = map(string)
   default = {
     Environment = "dev"
     Project     = "BusinessAutomationSystem"
