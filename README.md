@@ -1,103 +1,97 @@
-# Business Automation System (AWS 3-Tier Architecture)
+# Business Automation System (AWS + Terraform)
 
-## Project Description
+The Business Automation System is a fully modular, production-grade 3-tier infrastructure built on AWS using Terraform. It was created to showcase practical, real-world cloud engineering skills through secure, scalable architecture, infrastructure as code, monitoring, and CI/CD automation. It simulates a backend foundation suitable for internal business tools, CRMs, or enterprise web apps.
 
-The Business Automation System is a cloud-based infrastructure project built to support a small-to-medium business backend. It provisions a secure, modular, and production-ready 3-tier architecture using AWS and Terraform. The system hosts a Python/Flask application with a MySQL database and includes CI/CD, Secrets Management, centralized logging, and monitoring.
-
-## What Does It Do?
-
-- Provisions AWS infrastructure using Terraform (VPC, EC2, RDS, Security Groups)
-- Deploys a Flask application on an EC2 instance using a remote deploy script
-- Secures and retrieves credentials from AWS Secrets Manager
-- Uses GitHub Actions for CI/CD automation
-- Enables monitoring through AWS CloudWatch Agent
-- Stores Terraform remote state in S3 with DynamoDB state locking
-
-## Why Is It Useful?
-
-Most small businesses lack the resources to implement secure, scalable infrastructure. This project demonstrates how to:
-- Deploy real-world cloud infrastructure using infrastructure-as-code
-- Secure workloads using IAM, private subnets, and least-privilege access
-- Automate deployments using CI/CD best practices
-- Monitor logs and system health using built-in AWS tools
-It serves as both a production-ready baseline and a learning tool for cloud engineers.
+---
 
 ## Tech Stack
 
-- **Infrastructure**: Terraform (IaC), AWS (VPC, EC2, RDS, S3, IAM, CloudWatch)
-- **Application Layer**: Python, Flask, Gunicorn
-- **Database**: Amazon RDS (MySQL)
-- **Secrets Management**: AWS Secrets Manager
-- **Logging & Monitoring**: AWS CloudWatch
-- **CI/CD**: GitHub Actions
+- Cloud: AWS  
+- Infrastructure as Code: Terraform  
+- Compute: EC2 (Auto Scaling Group)  
+- Load Balancer: Application Load Balancer (ALB)  
+- Database: RDS MySQL  
+- Secrets Management: AWS Secrets Manager / SSM Parameter Store  
+- Monitoring: Amazon CloudWatch  
+- CI/CD: GitHub Actions  
+- State Management: S3 + DynamoDB  
+- Scripting: Bash
 
-## File Structure
+---
 
+## Features
+
+- Provisions a full 3-tier AWS architecture using Terraform  
+- Deploys EC2 instances in an Auto Scaling Group behind an ALB  
+- Uses secure IAM roles and policies for access control  
+- Stores secrets in AWS-managed encrypted services  
+- Sends alarms and monitors metrics using CloudWatch  
+- Separates dev and prod environments via tfvars files  
+- Enables push-based deployments using GitHub Actions CI/CD  
+- Manages Terraform state remotely with S3 backend and DynamoDB locking
+
+---
+
+## Monthly Cost Estimate (Dev Setup)
+
+| Service                   | Est. Monthly Cost |
+|---------------------------|-------------------|
+| EC2 t3.micro (1x)         | $7.60             |
+| EBS gp3 (20 GB)           | $1.60             |
+| ALB + 1 LCU               | $24.24            |
+| RDS db.t3.micro + 20GB    | $15–22            |
+| Secrets Manager (1x)      | $0.40             |
+| CloudWatch (logs + alarms)| $0.90             |
+| S3 + DynamoDB backend     | $0.30             |
+| Data Transfer (~50GB)     | $4.50             |
+| **Total**                 | **$50–$55/month** |
+
+> Small production setup with 2 EC2s and higher traffic: ~$60–$80/month
+
+---
+
+## Cost Optimization
+
+- Disable ALB in dev and use EC2 public IPs  
+- Replace Secrets Manager with free SSM Parameter Store  
+- Use t4g.micro instead of t3.micro if AMI supports ARM  
+- Stop EC2 and RDS when not in use  
+- Use Aurora Serverless v2 for bursty or intermittent workloads  
+- Set log retention in CloudWatch to 1–3 days  
+- Stay within Free Tier where eligible
+
+---
+
+## CI/CD Pipeline
+
+CI/CD is managed with GitHub Actions. It performs:
+
+- `terraform fmt` formatting checks  
+- `terraform validate` syntax validation  
+- Terraform plan with optional manual approval  
+- Secure secret management via GitHub repository settings  
+
+All commits to `main` or pull requests trigger the pipeline.
+
+---
+
+## Manual Deployment
+
+```bash
+terraform init
+terraform plan -var-file="dev.tfvars"
+terraform apply -var-file="dev.tfvars"
 ```
-modules/
-├── ec2/
-├── rds/
-├── security_groups/
-├── vpc/
-scripts/
-└── user_data.sh
-.github/workflows/
-└── ci-cd.yaml
-monitoring.tf
-main.tf
-variables.tf
-outputs.tf
-terraform.tfvars
+
+To destroy and remove all infrastructure:
+
+```bash
+terraform destroy -var-file="dev.tfvars"
 ```
-
-## How to Install and Run the Project
-
-### Prerequisites
-- AWS CLI installed and configured
-- Terraform installed (v1.8+)
-- SSH key pair (private key stored as GitHub secret)
-- AWS IAM user/role with permissions to manage infrastructure
-- GitHub repository secrets configured:
-  - `EC2_PUBLIC_IP`
-  - `EC2_SSH_KEY`
-
-### Steps to Deploy
-
-1. **Initialize Terraform and Apply**
-   ```
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-
-2. **Push App Changes to Trigger CI/CD**
-   ```
-   git add .
-   git commit -m "Deploy update"
-   git push origin main
-   ```
-
-3. **Verify Application**
-   - Access your Flask app in the browser using the EC2 public IP
-   - Confirm database access and log ingestion to CloudWatch
-
-4. **Destroy Infrastructure**
-   ```
-   terraform destroy
-   ```
-
-## Lessons Learned
-
-- How to build reusable and modular Terraform infrastructure
-- The importance of remote state management and locking for team collaboration
-- How to restrict access using IAM roles, instance profiles, and security groups
-- Integration of GitHub Actions for automated deployment pipelines
-- Secure secret handling using AWS Secrets Manager
-- Using CloudWatch Agent for centralized log collection and system metrics
 
 ---
 
 ## Author
 
 **Steven Lewis**  
-GitHub: [@sjlewis25](https://github.com/sjlewis25)
+GitHub: [github.com/sjlewis25](https://github.com/sjlewis25)
