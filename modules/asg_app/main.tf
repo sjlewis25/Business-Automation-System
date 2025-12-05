@@ -3,17 +3,31 @@ resource "aws_launch_template" "app" {
   image_id      = var.ami_id
   instance_type = var.instance_type
 
+  # IAM instance profile for Secrets Manager access
+  iam_instance_profile {
+    name = "ec2-secrets-instance-profile"  
+  }
+
+  # Pass the correct variables to user_data
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     db_host     = var.db_host
     db_user     = var.db_user
     db_password = var.db_password
   }))
 
+  # Security groups at the top level (not in network_interfaces)
   vpc_security_group_ids = [var.security_group_id]
+
+  # Network settings for public IP (simplified)
+  network_interfaces {
+    associate_public_ip_address = true
+    device_index                = 0
+    security_groups             = [var.security_group_id]
+    # DO NOT specify subnet_id here - let ASG handle it
+  }
 
   tag_specifications {
     resource_type = "instance"
-
     tags = merge(
       {
         Name = var.name
@@ -33,13 +47,13 @@ resource "aws_autoscaling_group" "app" {
   desired_capacity          = var.desired_capacity
   max_size                  = var.max_size
   health_check_type         = "ELB"
-  health_check_grace_period = 60
-  vpc_zone_identifier       = var.subnet_ids
+  health_check_grace_period = 300  # ← Increased to 5 minutes for app startup
+  vpc_zone_identifier       = var.subnet_ids  # ← This works now
   target_group_arns         = [var.target_group_arn]
 
   launch_template {
     id      = aws_launch_template.app.id
-    version = aws_launch_template.app.latest_version
+    version = "$Latest"  # ← Use $Latest instead of latest_version
   }
 
   tag {

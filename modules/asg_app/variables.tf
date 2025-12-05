@@ -38,4 +38,14 @@ variable "common_tags" {
   type        = map(string)
 }
 
+variable "region" {
+  description = "AWS region"
+  type        = string
+}
+
+variable "environment" {
+  description = "Deployment environment (e.g., dev, prod)"
+  type        = string
+}
+
 

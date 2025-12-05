@@ -30,8 +30,12 @@ module "asg_app" {
   target_group_arn  = module.alb.target_group_arn
 
   db_host     = module.rds.db_instance_endpoint
-  db_user     = var.db_username
-  db_password = var.db_password
+  db_user     = data.aws_ssm_parameter.db_username.value
+  db_password = data.aws_ssm_parameter.db_password.value
+
+  region      = var.region
+  environment = var.environment
+
   common_tags = var.common_tags
 }
 
@@ -47,8 +51,8 @@ module "alb" {
 module "rds" {
   source      = "./modules/rds"
   db_name     = var.db_name
-  db_username = var.db_username
-  db_password = var.db_password
+  db_username = data.aws_ssm_parameter.db_username.value
+  db_password = data.aws_ssm_parameter.db_password.value
   subnet_ids  = module.vpc.private_subnet_ids
   vpc_id      = module.vpc.vpc_id
   sg_id       = module.security_groups.rds_sg_id
@@ -62,6 +66,14 @@ module "cloudwatch_alarms" {
   rds_instance_id = module.rds.db_instance_id
   environment     = var.environment
   common_tags     = var.common_tags
+}
+
+data "aws_ssm_parameter" "db_username" {
+  name = "/business-app/dev/db_username"
+}
+
+data "aws_ssm_parameter" "db_password" {
+  name = "/business-app/dev/db_password"
 }
 
 

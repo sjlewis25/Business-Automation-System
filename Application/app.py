@@ -31,6 +31,10 @@ def get_connection():
 def index():
     return "Business Automation System is running."
 
+@app.route("/health")
+def health():
+    return "OK", 200
+
 @app.route("/submit_order", methods=["POST"])
 def submit_order():
     data = request.get_json()
@@ -54,6 +58,4 @@ def submit_order():
         conn.close()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
-
-
+    app.run(host="0.0.0.0", port=5000)
