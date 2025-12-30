@@ -1,6 +1,6 @@
-# Business Automation System (AWS 3-tier Architecture)
+# AWS 3-tier Architecture
 
-The Business Automation System is a fully modular, production-grade 3-tier infrastructure built on AWS using Terraform. It was created to showcase practical, real-world cloud engineering skills through secure, scalable architecture, infrastructure as code, monitoring, and CI/CD automation. It simulates a backend foundation suitable for internal business tools, CRMs, or enterprise web apps.
+This AWS Architecture is a fully modular, production-grade 3-tier infrastructure built on AWS using Terraform. It was created to showcase practical, real-world cloud engineering skills through secure, scalable architecture, infrastructure as code, monitoring, and CI/CD automation. It simulates a backend foundation suitable for internal business tools, CRMs, or enterprise web apps.
 
 ---
 
